@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Box,
   Grid,
@@ -9,7 +10,6 @@ import {
 } from "@mui/material";
 import { useQuery } from "react-query";
 import { useState } from "react";
-import Image from "next/image";
 
 type Photo = {
   id: number;

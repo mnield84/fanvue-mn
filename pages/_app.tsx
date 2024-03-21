@@ -1,3 +1,4 @@
+import React from "react";
 import type { AppProps } from "next/app";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import lightTheme from "../themes/lightTheme";
