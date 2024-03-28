@@ -30,3 +30,12 @@ Keep in mind these:
 - Type the responses from the API calls
 - create meaningful tags in the head of each page
 - add the favicon stealing it from fanvue.com ;)
+
+# Run locally
+
+- npm intstall
+- npm run dev
+
+# Test
+
+- npm test

@@ -1,4 +1,4 @@
-// components/PostComments.tsx
+import React from "react";
 import { useState } from "react";
 import { useQuery } from "react-query";
 import { Typography, Button, Box, CircularProgress } from "@mui/material";
@@ -23,31 +23,40 @@ async function fetchComments(postId: number): Promise<Comment[]> {
 
 type PostCommentsProps = {
   postId: number;
+  commentsCount: number;
 };
 
-export default function PostComments({ postId }: PostCommentsProps) {
+export default function PostComments({
+  postId,
+  commentsCount,
+}: PostCommentsProps) {
   const [showComments, setShowComments] = useState(false);
   const { data: comments, isLoading } = useQuery<Comment[]>(
     ["comments", postId],
     () => fetchComments(postId),
     {
-      enabled: showComments, // Only fetch comments when requested
+      enabled: showComments,
+      staleTime: 1000 * 60 * 5,
     }
   );
 
   const handleToggleComments = () => setShowComments(!showComments);
+
+  if (!isLoading && comments?.length === 0) {
+    return;
+  }
 
   return (
     <Box mt={2}>
       {isLoading ? (
         <CircularProgress size={20} />
       ) : (
-        <Button onClick={handleToggleComments}>
-          {showComments ? "Hide" : `Comments (${comments?.length || 0})`}
+        <Button onClick={handleToggleComments} aria-expanded={showComments}>
+          {showComments ? "Hide" : `Comments (${commentsCount})`}
         </Button>
       )}
       {showComments && comments && (
-        <Box mt={2}>
+        <Box mt={2} aria-live="polite" aria-atomic="true">
           {comments.map((comment) => (
             <Box key={comment.id} mt={1} p={1} boxShadow={2}>
               <Typography variant="body2">{comment.body}</Typography>

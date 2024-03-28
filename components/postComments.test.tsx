@@ -1,13 +1,11 @@
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import PostComments from "./postComments"; // Adjust the import path as necessary
+import PostComments from "./postComments";
 import fetchMock from "jest-fetch-mock";
 import { QueryClient, QueryClientProvider } from "react-query";
 
-// Enable fetch mocking
 fetchMock.enableMocks();
 
-// Define the type for mock comments
 type Comment = {
   postId: number;
   id: number;
@@ -31,7 +29,7 @@ describe("PostComments", () => {
     fetchMock.resetMocks();
   });
 
-  it('fetches and displays comments when the "Comments" button is clicked', async () => {
+  it('fetches and displays comments when the "Show Comments" button is clicked', async () => {
     fetchMock.mockResponseOnce(JSON.stringify(comments));
 
     const queryClient = new QueryClient({
@@ -44,19 +42,18 @@ describe("PostComments", () => {
 
     render(
       <QueryClientProvider client={queryClient}>
-        <PostComments postId={1} />
+        <PostComments postId={1} commentsCount={comments.length} />
       </QueryClientProvider>
     );
 
-    // The button might not have "Comments (0)" if your component logic is different. Adjust as necessary.
-    const commentsButton = await screen.findByRole("button", {
-      name: /comments/i,
+    const commentsButton = screen.getByRole("button", {
+      name: `Comments (${comments.length})`,
     });
     fireEvent.click(commentsButton);
 
-    // Wait for comments to be fetched and displayed
     await waitFor(() => {
       expect(screen.getByText(comments[0].body)).toBeInTheDocument();
+      expect(screen.getByText(comments[0].email)).toBeInTheDocument();
     });
   });
 });

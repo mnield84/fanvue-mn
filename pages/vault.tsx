@@ -1,15 +1,7 @@
-import React from "react";
-import {
-  Box,
-  Grid,
-  Modal,
-  Typography,
-  Container,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
+import React, { useState } from "react";
+import { Box, Grid, Typography, Container, Skeleton } from "@mui/material";
 import { useQuery } from "react-query";
-import { useState } from "react";
+import CustomModal from "../components/modal";
 
 type Photo = {
   id: number;
@@ -20,7 +12,7 @@ type Photo = {
 };
 
 async function fetchPhotos(): Promise<Photo[]> {
-  const albumId = 1; // Specify the album ID you're interested in
+  const albumId = 1;
   const response = await fetch(
     `https://jsonplaceholder.typicode.com/albums/${albumId}/photos`
   );
@@ -31,19 +23,30 @@ async function fetchPhotos(): Promise<Photo[]> {
 }
 
 export default function Vault() {
-  const theme = useTheme();
-  const matches = useMediaQuery(theme.breakpoints.up("sm"));
   const { data: photos, isLoading, error } = useQuery("photos", fetchPhotos);
-  const [open, setOpen] = useState(false);
+
+  const [modalOpen, setModalOpen] = useState(false);
   const [selectedImg, setSelectedImg] = useState("");
 
   const handleOpen = (imgUrl: string) => {
-    setOpen(true);
     setSelectedImg(imgUrl);
+    setModalOpen(true);
   };
-  const handleClose = () => setOpen(false);
 
-  if (isLoading) return <Typography>Loading...</Typography>;
+  if (isLoading) {
+    return (
+      <Grid container spacing={2}>
+        {Array.from(new Array(12)).map((_, index) => (
+          <Grid item xs={6} sm={4} md={3} key={index}>
+            <Box sx={{ width: "100%", paddingTop: "100%" }}>
+              <Skeleton variant="rectangular" width="100%" height="100%" />
+            </Box>
+          </Grid>
+        ))}
+      </Grid>
+    );
+  }
+
   if (error instanceof Error)
     return <Typography>Error: {error.message}</Typography>;
 
@@ -61,37 +64,17 @@ export default function Vault() {
                 cursor: "pointer",
               }}
               onClick={() => handleOpen(photo.url)}
-            ></Box>
+            />
           </Grid>
         ))}
       </Grid>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: matches ? "50%" : "50%",
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            p: 4,
-          }}
-        >
-          <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
-            <img
-              src={selectedImg}
-              alt="Full size"
-              style={{ width: "100%", height: "auto" }}
-            />
-          </Box>
-        </Box>
-      </Modal>
+      {modalOpen && (
+        <CustomModal
+          openInitially={modalOpen}
+          onClose={() => setModalOpen(false)}
+          selectedImg={selectedImg}
+        />
+      )}
     </Container>
   );
 }
